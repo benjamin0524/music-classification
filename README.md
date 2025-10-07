@@ -1,6 +1,13 @@
+沒問題 ✅
+以下是**原生 Markdown 格式**的 `README.md`，
+你可以直接整份複製貼上（不含上框線）到 GitHub 或任何 Markdown 編輯器，
+顯示會是乾淨的一頁版面：
+
+---
+
 # 🎵 Music Classification (Inference Only)
 
-This repository provides **two inference pipelines** for music artist classification — using both **traditional Machine Learning (SVM)** and **Deep Learning (CNN)**.  
+This repository provides **two inference pipelines** for music artist classification — using both **traditional Machine Learning (SVM)** and **Deep Learning (CNN)**.
 Both models are fully trained; you can directly run inference to reproduce classification results.
 
 ---
@@ -8,17 +15,25 @@ Both models are fully trained; you can directly run inference to reproduce class
 ## 📦 Environment Setup
 
 Recreate the environment using the included YAML file:
+
 ```bash
 conda env create -f music_env.yaml
 conda activate music
+```
+
 Or install manually:
 
-
+```bash
 conda create -n music python=3.10
 conda activate music
 pip install torch torchaudio librosa scikit-learn matplotlib tqdm numpy
-🧩 Project Structure
+```
 
+---
+
+## 🧩 Project Structure
+
+```
 music-classification/
 ├── CNN/                      # Deep learning inference (CNN)
 │   ├── inference_CNN.py
@@ -37,37 +52,58 @@ music-classification/
 ├── .gitignore
 ├── LICENSE
 └── README.md
-🚀 Inference Guide
-🧠 Deep Learning (CNN)
+```
 
+---
+
+## 🚀 Inference Guide
+
+### 🧠 Deep Learning (CNN)
+
+```bash
 cd CNN
 python inference_CNN.py
-📤 Output files
+```
 
-r14942087.json → top-3 predictions per track
+**Output files**
 
-val_CNN.png → validation confusion matrix
+* `r14942087.json` → top-3 predictions per track
+* `val_CNN.png` → validation confusion matrix
+* Model: `best_model_cnn.pth`
 
-Model: best_model_cnn.pth
+---
 
-🧩 Machine Learning (SVM)
+### 🧩 Machine Learning (SVM)
 
+```bash
 cd ML_code
 python inference.py
-📤 Output files
+```
 
-ML_round2.json → predicted top-3 artists
+**Output files**
 
-val_confusion_matrix.png → confusion matrix
+* `ML_round2.json` → predicted top-3 artists
+* `val_confusion_matrix.png` → confusion matrix
+* Models: `artist20_svm.pkl`, `artist20_scaler.pkl`
 
-Models: artist20_svm.pkl, artist20_scaler.pkl
+---
 
-⚙️ Notes
-No training or fine-tuning required — both models are inference-ready.
+## ⚙️ Notes
 
-File paths and configs are preset for the included dataset.
+* No training or fine-tuning required — both models are inference-ready.
+* File paths and configs are preset for the included dataset.
+* The provided `music_env.yaml` ensures full reproducibility.
 
-The provided music_env.yaml ensures full reproducibility.
+---
 
-📜 License
-This project is released under the MIT License.
+## 📜 License
+
+This project is released under the **MIT License**.
+
+---
+
+👤 **Author:** [benjamin0524](https://github.com/benjamin0524)
+📚 Department of Electrical Engineering, National Taiwan University
+🎯 Project: *Music Artist Classification using ML & CNN*
+
+---
