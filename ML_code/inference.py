@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Artist20 - Inference Only (use trained SVM model)
-Loads best saved model and scaler, runs prediction on test set.
-Output: student_ID.json
-"""
+
 
 import os, json, warnings, subprocess, tempfile, shutil
 warnings.filterwarnings("ignore")
@@ -14,13 +10,12 @@ from tqdm import tqdm
 from sklearn.preprocessing import normalize
 import joblib
 
-# ---------- PATHS ----------
 DATA_ROOT   = "../hw1/artist20"
 TEST_DIR    = os.path.join(DATA_ROOT, "test")
 OUTPUT_JSON = "student_ID.json"
 MODEL_FILE  = "artist20_svm.pkl"
 SCALER_FILE = "artist20_scaler.pkl"
-# ----------------------------
+
 
 SR = 16000
 N_MELS = 128
@@ -30,7 +25,7 @@ HOP = 160
 SEG_VAL = 12.0
 NSEG_VAL = 7
 
-# ---------- ffmpeg loader ----------
+
 def ffmpeg_load(path, sr=SR, offset=0.0, duration=None):
     tmp = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
     tmp_name = tmp.name; tmp.close()
@@ -58,12 +53,11 @@ def get_duration_sec(path):
     y, _ = ffmpeg_load(path, sr=SR)
     return len(y)/float(SR)
 
-# ---------- segmentation ----------
+
 def seg_offsets_eval(dur, seg_s, n):
     if dur <= seg_s: return [0.0]
     return list(np.linspace(0.0, dur - seg_s, n))
 
-# ---------- features ----------
 def stats_2d(F):
     mu = F.mean(axis=1); sd = F.std(axis=1)
     return np.concatenate([mu, sd], axis=0).astype(np.float32)
@@ -102,7 +96,6 @@ def extract_features(file_path, start_s, seg_s):
     x = np.nan_to_num(x)
     return x
 
-# ---------- inference ----------
 def main():
     assert os.path.isfile(MODEL_FILE), f"❌ model not found: {MODEL_FILE}"
     assert os.path.isfile(SCALER_FILE), f"❌ scaler not found: {SCALER_FILE}"
