@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Artist20 - CNN inference only (Top-3 JSON)
-- 工作目錄：/home/ubuntu/music/CNN
-- 讀取 best_model_cnn.pth，對 test 做推論
-- 多段(9x30s)幾何平均投票，輸出 student_ID.json
-"""
 
 import os, json, subprocess, tempfile, warnings
 warnings.filterwarnings("ignore")
@@ -15,13 +9,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# ===================== CONFIG =====================
 DATA_ROOT   = "../hw1/artist20"
 TRAIN_JSON  = os.path.join(DATA_ROOT, "train.json")
 TEST_JSON   = os.path.join(DATA_ROOT, "test.json")
 TEST_DIR    = os.path.join(DATA_ROOT, "test")
 
-BEST_MODEL  = "best_model_cnn.pth"     # /home/ubuntu/music/CNN/best_model_cnn.pth
+BEST_MODEL  = "best_model_cnn.pth"   
 TEST_OUT    = "student_ID.json"
 
 SR          = 16000
@@ -33,9 +26,7 @@ NSEG_EVAL   = 9
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 MAX_LEN = int(SR * SEG_LEN / HOP)
-# ==================================================
 
-# ---------------- ffmpeg helpers ------------------
 def ffmpeg_load(path, sr=SR, offset=0.0, duration=None):
     tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
     tmp_name = tmp.name; tmp.close()
@@ -62,7 +53,7 @@ def get_duration_sec(path):
         y = ffmpeg_load(path, sr=SR)
         return len(y)/SR
 
-# ---------------- path & labels -------------------
+
 def load_json_list(json_path):
     base_dir = os.path.dirname(os.path.abspath(json_path))
     with open(json_path, "r", encoding="utf-8") as f:
@@ -80,7 +71,7 @@ def extract_label_from_path(path):
         if i + 1 < len(parts): return parts[i+1]
     return parts[-2]
 
-# ---------------- features ------------------------
+
 def to_logmel(y, sr=SR):
     import librosa
     S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=N_MELS,
@@ -98,7 +89,7 @@ def seg_offsets_eval(dur, seg_s=SEG_LEN, n=NSEG_EVAL):
     if dur <= seg_s: return [0.0]
     return list(np.linspace(0.0, dur - seg_s, n))
 
-# ---------------- Model（與訓練相同） --------------
+
 class SEBlock(nn.Module):
     def __init__(self, c, r=16):
         super().__init__()
@@ -152,7 +143,7 @@ class StrongCNN(nn.Module):
         x = self.layer1(x); x = self.layer2(x); x = self.layer3(x)
         return self.head(x)
 
-# ---------------- Inference helpers ----------------
+
 @torch.no_grad()
 def predict_top3_for_file(model, fp, classes):
     dur = get_duration_sec(fp)
@@ -170,22 +161,18 @@ def predict_top3_for_file(model, fp, classes):
     return [classes[i] for i in idx]
 
 def main():
-    # 1) 類別順序（跟訓練時一致：由 train.json 決定且排序）
     train_files = load_json_list(TRAIN_JSON)
     classes = sorted(list(set(extract_label_from_path(f) for f in train_files)))
     n_class = len(classes)
     print(f"Classes: {n_class}")
 
-    # 2) 載入模型
     if not os.path.isfile(BEST_MODEL):
         raise FileNotFoundError(f"找不到模型權重：{BEST_MODEL}")
     model = StrongCNN(n_class).to(DEVICE)
     state = torch.load(BEST_MODEL, map_location=DEVICE)
-    # 兼容：保存的是純 state_dict(dict of tensors)
     if isinstance(state, dict) and next(iter(state.values())).__class__.__name__.endswith("Tensor"):
         model.load_state_dict(state)
     else:
-        # 若你誤存成整個 model，可嘗試：
         model.load_state_dict(state.state_dict())
     model.eval()
     print(f"[LOAD] {BEST_MODEL}")
